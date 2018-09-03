@@ -483,6 +483,15 @@ In order to **make your own Ice Nucleation Cold Stage**, you may use the **part 
   </tr>
   
 	
+  <tr>
+    <td>
+    5pcs 90 x 90mm Cooling Fan Grill Metal Iron Wire Finger Guards System Pack (only need one) <br>
+    <img src="images/bom/90x90_fan_grill.jpg" width="100"></td>
+    <td><a href="https://cgi.ebay.co.uk/ws/eBayISAPI.dll?ViewItemVersion&item=292531055201&view=all&tid=1589736431019" target="_blank"> Ebay </a></td> 
+    <td>£1.96</td>
+  </tr>
+  
+	
 		
 	
 		
