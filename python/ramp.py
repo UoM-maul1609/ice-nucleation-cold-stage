@@ -4,6 +4,7 @@ from smbus import SMBus
 import struct
 import time
 import numpy as np
+import os
 
 
 bus = SMBus(1) #
@@ -41,9 +42,12 @@ def get_data():
     convert the bytes to a floating point (top line is python2, bottom python3)
 """
 def get_float(data, index):
-   bytes1 = data[4*index:(index+1)*4]
-#   return struct.unpack('f', "".join(map(chr, bytes1)))[0]
-   return struct.unpack('f', bytes(bytes1))[0]
+   #bytes1 = data[4*index:1+(index+1)*4]
+   bytes1=data[0:4]
+   print(data)
+#   return struct.unpack('<f', "".join(map(chr, bytes1)))[0]
+   return struct.unpack('<f', bytes(bytes1))[0]
+ #  return bytes(bytes1,'utf8')
 
 
 
@@ -84,6 +88,23 @@ if __name__ == '__main__':
     
     print(gradient,seconds_until_ramp_finished,seconds_until_end)
     
+    
+    """
+        open file
+    """
+    filename1=start_time.strftime('%Y%m%d-%H%M%S')
+    fp = open('../../output/' + filename1 +'.txt','w')
+    
+    fp.write('{:f}'.format(gradient) + ' ' \
+                +'{:f}'.format(seconds_until_ramp_finished) + ' ' \
+                +'{:f}'.format(seconds_until_end) + '\n')
+    fp.write('time set-point t_instant\n')
+    fp.close()
+    """
+        record video
+    """
+    returned=os.system('raspivid -o ../../output/'  + filename1 + '.h264 -n -drc high -t ' \
+                        + str(round((seconds_until_end+1)*1000,0)) + '&')
 
     """
         loop over indefinitely - well, until we break out of the loop 
@@ -99,7 +120,7 @@ if __name__ == '__main__':
             temperature = temperature_init+gradient*(currentmillis/1000.-time_init)
         elif((currentmillis > seconds_until_ramp_finished*1000) and
             (currentmillis <= seconds_until_end*1000)):
-            temperature = arr[1]
+            temperature = arr[1,0]
         elif((currentmillis > seconds_until_end*1000)):
             temperature = 100.
         
@@ -108,20 +129,32 @@ if __name__ == '__main__':
         # write every "interval"
         if(currentmillis - prevmillis > interval):
                 try:
-                        prevmillis = currentmillis
                         
                         # pack float and 2 bytes into a byte array
-                        bytescommand = struct.pack('1fbb',temperature,command,test) 
+                        bytescommand = struct.pack('<1fbb',round(temperature,2),int(command),int(test)) 
                         
                         # write this data
                         bus.write_block_data(arduinoAddress,1,list(bytescommand))
                         #print(list(bytescommand))
-                        
+                        #time.sleep(0.1)
                         # get the temperature from the arduino
+                        time.sleep(0.01)
                         data = get_data()
                         print(currentmillis/1000.,temperature,get_float(data,0))
                         #print(get_float(data,1))
+
+                        """
+                                write to a file
+                        """
+                        fp=open('../../output/' + filename1 +'.txt','a')
+                        fp.write('{:f}'.format(currentmillis/1000.) + ' ' \
+                                +'{:f}'.format(temperature) + ' ' \
+                                +'{:f}'.format(get_float(data,0)) + '\n')
+                        fp.close()
+
+                        prevmillis = currentmillis
                         if((currentmillis > seconds_until_end*1000)):
+                            fp.close()
                             break
                 except:
                         continue

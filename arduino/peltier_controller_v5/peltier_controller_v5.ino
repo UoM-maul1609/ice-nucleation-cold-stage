@@ -8,7 +8,7 @@
 
 float data_s[FLOATS_SENT]; // buffer to send variables to RPi
 byte data[12]; // buffer to read variables sent from RPi (as bytes)
-int command;
+int command,potVal;
 
 unsigned long  starttime,newmillis; // variable to determine when Serial IO occurs
 
@@ -17,6 +17,7 @@ unsigned long  starttime,newmillis; // variable to determine when Serial IO occu
    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 double temperature_read = 0.0, Setpoint=100.0, Output; // set point initially high, so current off
+int numr=0;
 #define OUTPUT_MIN 235
 #define OUTPUT_MAX 0
 PID myPID(&temperature_read, &Output,&Setpoint, 2, 5, 1, P_ON_M, REVERSE);
@@ -37,7 +38,7 @@ void setup ()
 
   // turn PID on
   myPID.SetMode(AUTOMATIC);
-
+  data_s[0]=0.;
   // read the temperature
   readTemp();
   // i2c comms
@@ -57,8 +58,9 @@ void readTemp() {
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
   value=analogRead(A0);
-  temperature_read=(float(value)/1023.*5)*203.5837-508.7424;
-  data_s[0]=temperature_read;
+  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
+  numr++;
+  data_s[0]+=temperature_read;
   /* ------------------------------------------------------------------
   */
 }
@@ -68,7 +70,7 @@ void readTemp() {
 
 void loop ()
 {
-  int mosfetSwitch, usePot, potVal, value;
+  int mosfetSwitch, usePot, value;
 
   // read the temperature
   readTemp();
@@ -88,6 +90,7 @@ void loop ()
                           // buck converter / Peltier
 
       if(rpi) {
+        //temperature_read=data_s[0] / numr;
         myPID.Compute(); // call every loop, updates automatically at the time interval set
         Output=min(Output,OUTPUT_MIN);
         if(isnan(Output)) Output = 0.;
@@ -116,27 +119,6 @@ void loop ()
 
 
 
-  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   * Serial 
-   * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-  newmillis = millis()/62;
-  if(newmillis-starttime >= sampletime) {
-    Serial.print("Temperature is ");
-    Serial.print(temperature_read);
-    Serial.print(" ");
-    Serial.print(Setpoint);
-    Serial.print(" ");
-    Serial.print(starttime);
-    Serial.print(" ");
-    Serial.print(newmillis);
-    Serial.println();
-    
-    starttime=millis()/62;
-  }
-  /* ------------------------------------------------------------------
-  */
-  //delay(500*62);
 }
 
 
@@ -169,7 +151,33 @@ void parseValues(byte data[]) {
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void sendData(){
-  Wire.write((byte*) &data_s[0], FLOATS_SENT*sizeof(float));
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Serial 
+   * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+  newmillis = millis()/62;
+  if((newmillis-starttime >= sampletime)) {
+    data_s[0] /= numr;
+    Serial.print("Temperature is ");
+    Serial.print(data_s[0]);
+    Wire.write((byte*) &data_s[0], FLOATS_SENT*sizeof(float));
+    Serial.print(" ");
+    Serial.print(Setpoint);
+    Serial.print(" ");
+    Serial.print(potVal);
+    Serial.print(" ");
+    Serial.print(starttime);
+    Serial.print(" ");
+    Serial.print(newmillis);
+    Serial.println();
+    
+    starttime=millis()/62;
+    data_s[0]=0.;
+    numr=0;
+  }
+  /* ------------------------------------------------------------------
+  */
+  //delay(1*62);
 }
 /* ------------------------------------------------------------------
 */
@@ -183,17 +191,39 @@ void sendData(){
 */
 void receiveEvent(int howMany)
 {
-  command = Wire.read();
+  byte test, command=0,tmp;
+  if(howMany == 0) return;
+/*  while (command != 255) {
+    command = Wire.read();
+    Serial.println(command);
+  }
+  while (command != 1) {
+    command = Wire.read();
+    Serial.println(command);
+  }*/
+  //command = Wire.read();
   //if (command==1){
     int i=0;
-    while(Wire.available()) // loop through all but the last
-    {
-      data[i] = Wire.read(); // receive byte as a character
-      i = i+1;
-    }
-    //Serial.println(i);
-    parseValues(data);
-  //}
+    //if(howMany >= 4) {
+      while(1 <= Wire.available()) // loop through all but the last
+      {
+        data[i] = Wire.read(); // receive byte as a character
+        if(data[i] == 1) i=-1;
+        i = i+1;
+        //i=min(i,10);
+      }
+/*      Serial.print(data[0]);
+      Serial.print(" ");
+      Serial.print(data[1]);
+      Serial.print(" ");
+      Serial.print(data[2]);
+      Serial.print(" ");
+      Serial.print(data[3]);
+      Serial.print(" ");
+      Serial.print(data[4]);
+      Serial.print(" ");*/
+      parseValues(data);
+   //}
 }
 /* ------------------------------------------------------------------
 */
