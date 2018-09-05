@@ -5,6 +5,7 @@
 #define sampletime 1000 // time for printing to Serial 
 #define rpi true
 #define FLOATS_SENT 1 // number of floating-point variables sent to RPi
+#define factor 1. // was 62
 
 float data_s[FLOATS_SENT]; // buffer to send variables to RPi
 byte data[12]; // buffer to read variables sent from RPi (as bytes)
@@ -33,8 +34,9 @@ void setup ()
   pinMode(4,INPUT);
   pinMode(A1,INPUT); // pot read
 
-  TCCR0B=TCCR0B & B11111000 | B00000001; // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-  starttime = millis()/62;   // get the current time;
+  //TCCR0B=TCCR0B & B11111000 | B00000001; // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
+  
+  starttime = millis()/factor;   // get the current time;
 
   // turn PID on
   myPID.SetMode(AUTOMATIC);
@@ -106,6 +108,7 @@ void loop ()
       potVal=min(potVal,235);
       analogWrite(6,potVal);
     }
+    //delay(100*factor);
   }
   /* ------------------------------------------------------------------
   */
@@ -155,7 +158,7 @@ void sendData(){
    * Serial 
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-  newmillis = millis()/62;
+  newmillis = millis()/factor;
   if((newmillis-starttime >= sampletime)) {
     data_s[0] /= numr;
     Serial.print("Temperature is ");
@@ -164,20 +167,20 @@ void sendData(){
     Serial.print(" ");
     Serial.print(Setpoint);
     Serial.print(" ");
-    Serial.print(potVal);
+    Serial.print(Output);
     Serial.print(" ");
     Serial.print(starttime);
     Serial.print(" ");
     Serial.print(newmillis);
     Serial.println();
     
-    starttime=millis()/62;
+    starttime=millis()/factor;
     data_s[0]=0.;
     numr=0;
   }
   /* ------------------------------------------------------------------
   */
-  //delay(1*62);
+  //delay(1*factor);
 }
 /* ------------------------------------------------------------------
 */
