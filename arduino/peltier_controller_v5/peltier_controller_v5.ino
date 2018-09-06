@@ -5,7 +5,9 @@
 #define sampletime 1000 // time for printing to Serial 
 #define rpi true
 #define FLOATS_SENT 1 // number of floating-point variables sent to RPi
-#define factor 1. // was 62
+#define high_freq true
+float factor = 1.; // was 62
+#define MPIN 6
 
 float data_s[FLOATS_SENT]; // buffer to send variables to RPi
 byte data[12]; // buffer to read variables sent from RPi (as bytes)
@@ -20,7 +22,7 @@ unsigned long  starttime,newmillis; // variable to determine when Serial IO occu
 double temperature_read = 0.0, Setpoint=100.0, Output; // set point initially high, so current off
 int numr=0;
 #define OUTPUT_MIN 235
-#define OUTPUT_MAX 0
+#define OUTPUT_MAX 10
 PID myPID(&temperature_read, &Output,&Setpoint, 2, 5, 1, P_ON_M, REVERSE);
 /* ------------------------------------------------------------------
 */
@@ -29,17 +31,24 @@ void setup ()
 {
   
   Serial.begin(9600);
-  pinMode(6, OUTPUT); // output pin for OCR2B
+  pinMode(MPIN, OUTPUT); // output pin for OCR2B
   pinMode(5,INPUT);
   pinMode(4,INPUT);
   pinMode(A1,INPUT); // pot read
 
-  //TCCR0B=TCCR0B & B11111000 | B00000001; // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-  
+  if(high_freq) {
+    TCCR0B=TCCR0B & B11111000 | B00000001; // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
+    factor=62.;
+    //TCCR1B = TCCR1B & B11111000 | B00000001; // set timer 1 divisor to     1 for PWM frequency of 31371.55 Hz
+    //factor=32.;
+  } 
+    
   starttime = millis()/factor;   // get the current time;
 
   // turn PID on
   myPID.SetMode(AUTOMATIC);
+  myPID.SetOutputLimits(OUTPUT_MIN, OUTPUT_MAX);
+  myPID.SetSampleTime(200*factor);
   data_s[0]=0.;
   // read the temperature
   readTemp();
@@ -95,18 +104,21 @@ void loop ()
         //temperature_read=data_s[0] / numr;
         myPID.Compute(); // call every loop, updates automatically at the time interval set
         Output=min(Output,OUTPUT_MIN);
+        Output=max(Output,OUTPUT_MAX);
         if(isnan(Output)) Output = 0.;
-        analogWrite(6,Output);
+        if(Setpoint > 50.) Output = 0.;
+        analogWrite(MPIN,Output);
         //Serial.println(Output);
+        //delay(500*factor);
       } else {
-        analogWrite(6,200); 
+        analogWrite(MPIN,200); 
       }
     } else {              // use potential divider to 
                           // determine PWM for buck converter / Peltier
       potVal=analogRead(A1);
       potVal=map(potVal,0,1023,0,235);
       potVal=min(potVal,235);
-      analogWrite(6,potVal);
+      analogWrite(MPIN,potVal);
     }
     //delay(100*factor);
   }
@@ -114,7 +126,11 @@ void loop ()
   */
 
 
-
+    /*Serial.print("Temperature is ");
+    Serial.print(temperature_read);
+    Serial.print("; Output is ");
+    Serial.print(Output);
+    Serial.println("");*/
 
 
 
