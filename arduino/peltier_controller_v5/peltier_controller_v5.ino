@@ -69,7 +69,8 @@ void readTemp() {
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
   value=analogRead(A0);
-  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
+//  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
+  temperature_read=float(value)*1.0528-540.5262;
   numr++;
   data_s[0]+=temperature_read;
   /* ------------------------------------------------------------------

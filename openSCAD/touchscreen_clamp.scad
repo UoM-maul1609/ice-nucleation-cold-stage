@@ -6,8 +6,8 @@ difference() {
             translate([0,33,0]) cylinder(d=25,h=5,center=true);
             translate([0,-33,0]) cylinder(d=25,h=5,center=true);
         }
-        translate([0,60-2.5,-2-2.5]) cube([15,5,4],true);
-        translate([0,-(60-2.5),-2-2.5]) cube([15,5,4],true);
+        translate([0,60-2.5,-2-2.5-1]) cube([15,5,4+2],true);
+        translate([0,-(60-2.5),-2-2.5-1]) cube([15,5,4+2],true);
     }
     translate([0,2.5,0]) union() {
         translate([0,33,0]) cylinder(d=3.5,h=10,center=true);

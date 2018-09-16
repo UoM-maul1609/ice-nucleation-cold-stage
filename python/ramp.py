@@ -103,7 +103,7 @@ if __name__ == '__main__':
     """
         record video
     """
-    returned=os.system('raspivid -o ../../output/'  + filename1 + '.h264 -n -drc high -t ' \
+    returned=os.system('raspivid -o ../../output/'  + filename1 + '.h264 -n -fps 5 -drc high -t ' \
                         + str(round((seconds_until_end+1)*1000,0)) + '&')
 
     """

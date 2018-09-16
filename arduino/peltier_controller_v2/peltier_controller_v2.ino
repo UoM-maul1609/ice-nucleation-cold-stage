@@ -26,7 +26,7 @@ void loop ()
   int mosfetSwitch, usePot, potVal, value;
   float T;
 
-  mosfetSwitch=digitalRead(4);
+  /*mosfetSwitch=digitalRead(4);
   if(mosfetSwitch==LOW) {
     analogWrite(6,0);
   } else {
@@ -42,8 +42,8 @@ void loop ()
       //Serial.println(potVal);
     }
   }
-
-
+*/
+  analogWrite(6,200);
 
   // ad8495 TC:
   value=analogRead(A0);

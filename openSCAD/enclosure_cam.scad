@@ -3,7 +3,7 @@ LID=1;
 BOX=2;
 
 show1=LID;
-
+led_y=40;
 if(show1==LID) {
     difference() {
         cube([100,147,2],true);
@@ -14,18 +14,18 @@ if(show1==LID) {
         translate([100/2-3.5,-147/2+3.5,0]) cylinder(d=3,h=10,center=true);
         translate([-100/2+3.5,147/2-3.5,0]) cylinder(d=3,h=10,center=true);
         translate([-100/2+3.5,-147/2+3.5,0]) cylinder(d=3,h=10,center=true);
-        translate([30,0,0]) cylinder(d=6,h=20,center=true);
+        translate([led_y,0,0]) cylinder(d=6,h=20,center=true);
     }
     
     // led holder
     difference() {
         union() {
-            translate([30,0,15+1]) cylinder(d=12,h=30,center=true);
-            translate([30,6,15+1]) cube([10,8,30],true);
+            translate([led_y,0,15+1]) cylinder(d=12,h=30,center=true);
+            translate([led_y,6,15+1]) cube([10,8,30],true);
         }
-        translate([30,0,15+1+0.99]) cylinder(d=8,h=32,center=true);
-        translate([30,10,20+1-3]) rotate([90,0,0]) cylinder(d=4.1,h=20,center=true,$fn=30);
-        translate([30,6.5,20+1-3]) {
+        translate([led_y,0,15+1+0.99]) cylinder(d=8,h=32,center=true);
+        translate([led_y,10,20+1-3]) rotate([90,0,0]) cylinder(d=4.1,h=20,center=true,$fn=30);
+        translate([led_y,6.5,20+1-3]) {
             nut(8.15);
             translate([5,0,0]) cube([10,3.5,7.0581],true);
         }
@@ -127,7 +127,7 @@ module camera_back() {
 }
 module camera()
 translate([0,1.5,0]) difference() {
-    import("../stl/RPi_camera_stand.stl");
+    import("../stl/RPi_camera_stand/RPi_camera_stand.stl");
     translate([0,-38.,0]) cube([50,50,30],true);
 }
 

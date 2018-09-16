@@ -2,7 +2,8 @@
     od=12;
 // Inner Diameter (cable)
     id=4.7*1.1; // 8
-    id=1.;
+    id=4.2; // 8
+//    id=1.;
 // nut height
     nh=5;
 // thread pitch

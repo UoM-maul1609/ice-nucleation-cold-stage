@@ -1,6 +1,6 @@
 % !ffmpeg -i video1.h264 video1.mp4
 
-vidObj=VideoReader('video.mp4');
+vidObj=VideoReader('/tmp/20180911-131519.mp4');
 th=linspace(0,2.*pi,50);
 r=70;
 x=r.*cos(th);
