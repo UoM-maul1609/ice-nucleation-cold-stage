@@ -44,9 +44,9 @@ def get_data():
 def get_float(data, index):
    #bytes1 = data[4*index:1+(index+1)*4]
    bytes1=data[0:4]
-   print(data)
+   #print(data)
 #   return struct.unpack('<f', "".join(map(chr, bytes1)))[0]
-   return struct.unpack('<f', bytes(bytes1))[0]
+   return struct.unpack("<f", bytes(bytes1))[0]
  #  return bytes(bytes1,'utf8')
 
 
@@ -95,17 +95,23 @@ if __name__ == '__main__':
     filename1=start_time.strftime('%Y%m%d-%H%M%S')
     fp = open('../../output/' + filename1 +'.txt','w')
     
-    fp.write('{:f}'.format(gradient) + ' ' \
-                +'{:f}'.format(seconds_until_ramp_finished) + ' ' \
-                +'{:f}'.format(seconds_until_end) + '\n')
-    fp.write('time set-point t_instant\n')
+    fp.write("{:f}".format(gradient) + " " \
+                +"{:f}".format(seconds_until_ramp_finished) + " "\
+                +"{:f}".format(seconds_until_end) + "\n")
+    fp.write("time set-point t_instant\n")
     fp.close()
     """
         record video
     """
-    returned=os.system('raspivid -o ../../output/'  + filename1 + '.h264 -n -fps 5 -drc high -t ' \
-                        + str(round((seconds_until_end+1)*1000,0)) + '&')
-
+    
+    returned=os.system("raspivid -o ../../output/"  + filename1 + ".h264 --preview 50,50,300,200  -fps 5 -drc high -t " \
+                        + str(round((seconds_until_end+1)*1000,0)) + "&")
+    
+    """
+    returned=os.system("raspivid --preview 50,50,300,200 -fps 5 -drc high -t " \
+                        + str(round((seconds_until_end+1)*1000,0)) + "&")
+    """
+    
     """
         loop over indefinitely - well, until we break out of the loop 
     """
@@ -125,7 +131,6 @@ if __name__ == '__main__':
             temperature = 100.
         
         
-        
         # write every "interval"
         if(currentmillis - prevmillis > interval):
                 try:
@@ -138,18 +143,18 @@ if __name__ == '__main__':
                         #print(list(bytescommand))
                         #time.sleep(0.1)
                         # get the temperature from the arduino
-                        time.sleep(0.01)
+                        #time.sleep(0.01)
                         data = get_data()
-                        print(currentmillis/1000.,temperature,get_float(data,0))
+                        print(format(currentmillis/1000.,"0.2f"),format(temperature,"0.2f"),format(get_float(data,0),"0.2f"))
                         #print(get_float(data,1))
 
                         """
                                 write to a file
                         """
-                        fp=open('../../output/' + filename1 +'.txt','a')
-                        fp.write('{:f}'.format(currentmillis/1000.) + ' ' \
-                                +'{:f}'.format(temperature) + ' ' \
-                                +'{:f}'.format(get_float(data,0)) + '\n')
+                        fp=open("../../output/" + filename1 +".txt","a")
+                        fp.write("{:f}".format(currentmillis/1000.) + " " \
+                                +"{:f}".format(temperature) + " " \
+                                +"{:f}".format(get_float(data,0)) + "\n")
                         fp.close()
 
                         prevmillis = currentmillis
@@ -159,4 +164,5 @@ if __name__ == '__main__':
                 except:
                         continue
     
+        time.sleep(0.01)
 

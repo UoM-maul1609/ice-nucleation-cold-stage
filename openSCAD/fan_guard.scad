@@ -27,6 +27,7 @@ pelt_cutout_rad=36.5/2;
 
 FAN_GUARD=1;
 PELTIER_CLAMP=2;
+PELTIER_CLAMP2=9;
 NUT_AND_BOLT=3;
 FIXING=4;
 GLASS_CLAMP=5;
@@ -34,7 +35,7 @@ GLASS_CLAMP2=6;
 GLASS_CLAMP3=7;
 ORING_PLACEMENT=8;
 
-object=PELTIER_CLAMP;
+object=PELTIER_CLAMP2;
 
 
 if(object==FAN_GUARD) {
@@ -186,6 +187,115 @@ if(object==FAN_GUARD) {
  */       
         // for LED
         //translate([-40,40,0]) rotate([0,90,-45]) cylinder(r=6./2,h=100,center=true);
+
+   }
+
+   
+
+}   else if(object==PELTIER_CLAMP2) {
+    difference() {
+        union() {
+            rotate([0,0,45]) translate([11.5,0,0]) minkowski() { 
+                cube([85*2-2*rad_curve,60*2-2*rad_curve,1.5],true);
+                cylinder(r=rad_curve,h=1.5,center=true);
+            }
+
+            translate([0,0,-3]) cylinder(d=60,h=3,center=true);
+            
+            // cover hinge clamp
+            rotate([0,0,45]) translate([-77/2,25/2,-1.5-2.5/2.]) cube([13,13,2.5],true);
+            rotate([0,0,45]) translate([-77/2,-25/2,-1.5-2.5/2.]) cube([13,13,2.5],true);
+            
+            // clamp for acrylic cover
+            rotate([0,0,45]) translate([80/2,0,-1.5-2.5/2.]) cube([13,13,2.5],true);
+            
+            // clamp for chamber
+            rotate([0,0,45]) translate([73.5+12.5+2.5,0,-2.5-1.5]) cube([13,13,5],true);
+            
+            // fixing for hinge:
+            rotate([0,0,45]) translate([-73.5+2.5,0,-6-1]) cube([5,60,12],true);
+
+        }
+        // holes for chamber hinge
+        rotate([0,0,45]) translate([-73.5,0,+1-6.32]) {
+            rotate([0,90,0]) translate([0,23.5,0]) cylinder(d=3,h=20,center=true);
+            rotate([0,90,0]) cylinder(d=3,h=20,center=true);
+            rotate([0,90,0]) translate([0,-23.5,0]) cylinder(d=3,h=20,center=true);            
+        }
+        
+        
+        // hole for thermocouple:
+        rotate([0,0,45]) translate([-15,25,0]) cylinder(d=1.7,h=10,center=true);
+        rotate([0,0,45]) translate([-15,25,-3]) cube([3,3,3],center=true);
+        // 4 screw holes:
+        translate([cyl_pelt_holes,0,0]) {
+            cylinder(r=hole_rad,h=hole_hgt,center=true);
+//            translate([0,0,1]) cylinder(r1=hole_rad,r2=5,h=2,center=true);
+        }
+        translate([-cyl_pelt_holes,0,0]) {
+            cylinder(r=hole_rad,h=hole_hgt,center=true);
+//            translate([0,0,1]) cylinder(r1=hole_rad,r2=5,h=2,center=true);
+        }
+        translate([0,cyl_pelt_holes,0]) {
+            cylinder(r=hole_rad,h=hole_hgt,center=true);
+//            translate([0,0,1]) cylinder(r1=hole_rad,r2=5,h=2,center=true);
+        }
+        translate([0,-cyl_pelt_holes,0]) {
+            cylinder(r=hole_rad,h=hole_hgt,center=true);
+//            translate([0,0,1]) cylinder(r1=hole_rad,r2=5,h=2,center=true);
+        }
+        //-
+
+        // bottom peltier stage:
+        translate([0,0,-3]) {
+            rotate([0,0,45]) {
+                translate([0,0.5,0]) cube([40.75,40.75+1,3.0],true);
+                translate([-40.75/2+2,40/2,0]) cube([4,20,3.0],true);
+                translate([-(-40.75/2+2),40/2,0]) cube([4,20,3.0],true);
+            }
+        }
+        
+        // contacts on bottom peltier
+        translate([0,0,-3]) {
+            rotate([0,0,45]) {
+                translate([-40.75/2+4,30.75/2+6./2,0]) cube([8,6.,4],true);
+                translate([-(-40.75/2+4),30.75/2+6./2,0]) cube([8,6.,4],true);
+                translate([-40.75/2+4+2,30.75/2-5./2,0]) cube([8,5.,4],true);
+                translate([-(-40.75/2+4)-2,30.75/2-5./2,0]) cube([8,5.,4],true);
+            }
+        }
+        
+
+        // top peltier stage:
+        rotate([0,0,45]) cube([30.75,30.75,hole_hgt],true);
+        
+        // holes for hinge
+        rotate([0,0,45]) translate([-77/2,25/2,0]) {
+            cylinder(d=4.5,h=10,center=true);
+            translate([0,0,-5-1.5+1.5]) rotate([90,0,0]) nut(8.15);
+        }
+        rotate([0,0,45]) translate([-77/2,-25/2,0]) {
+            cylinder(d=4.5,h=10,center=true);
+            translate([0,0,-5-1.5+1.5]) rotate([90,0,0]) nut(8.15);            
+        }
+        
+        // hole for hinge to hole down acrylic
+        rotate([0,0,45]) translate([-77/2-10,0,1.5]) {
+            rotate([90,0,0]) cylinder(d=5,h=42,center=true);
+        }
+
+        // hole for clamp
+        rotate([0,0,45]) translate([80/2,0,0]) {
+            cylinder(d=4.5,h=20,center=true);
+            translate([0,0,-5-1.5+1.5]) rotate([90,0,0]) nut(8.15);
+//            translate([0,0,5+1.5-3.7+2]) rotate([90,0,0]) nut(8.15);  
+        }        
+        // hole for chamber clamp
+        rotate([0,0,45]) translate([73.5+12.5+2.5,0,0]) {
+            cylinder(d=4.5,h=20,center=true);
+            translate([0,0,5+1.5-3.7]) rotate([90,0,0]) nut(8.15);  
+        }        
+      
 
    }
 
