@@ -1,3 +1,8 @@
+COMPARTMENTS=1;
+ORING_ONLY=2;
+
+version1=ORING_ONLY;
+
 $fn=60;
 union() {
     difference() {
@@ -11,24 +16,26 @@ union() {
         }
         
     }
-    difference() {
-        union() {
-            translate([0,0,0.4]) minkowski() {
-                cube([24.2-5,26-5,3.2/2.],true);
-                cylinder(d=5,h=3.2/2.,center=true);
+    if(version1==COMPARTMENTS) {
+        difference() {
+            union() {
+                translate([0,0,0.4]) minkowski() {
+                    cube([24.2-5,26-5,3.2/2.],true);
+                    cylinder(d=5,h=3.2/2.,center=true);
+                }
+                translate([0,0,1-0.5]) cube([55,2.5,3],true);
+                translate([0,0,1-0.5]) cube([2.5,55,3],true);
             }
-            translate([0,0,1-0.5]) cube([55,2.5,3],true);
-            translate([0,0,1-0.5]) cube([2.5,55,3],true);
+            
+            
+            translate([0,0,-2-0.5-0.3]) cube([25.2,25.2,2],true);
+            for (i=[1 : 4]) {
+                for(j=[1:4]) {
+                    translate([-25/2+4+(25-2)/4*(i-1),
+                        -25/2+4+(25-2)/4*(j-1),0]) cylinder(d=5.,h=10,center=true);
+                }   
+            }
+            
         }
-        
-        
-        translate([0,0,-2-0.5-0.3]) cube([25.2,25.2,2],true);
-        for (i=[1 : 4]) {
-            for(j=[1:4]) {
-                translate([-25/2+4+(25-2)/4*(i-1),
-                    -25/2+4+(25-2)/4*(j-1),0]) cylinder(d=5.,h=10,center=true);
-            }   
-        }
-        
     }
 }
