@@ -17,7 +17,7 @@ test = 30
 temperature_init=5. # cool to 5 degrees before starting ramp
 time_init=30. # take 30 seconds to get to 5 degrees
 
-video1=0 # 0 no show; 1 show; 2 show and record
+video1=2 # 0 no show; 1 show; 2 show and record
 
 """
     time into the ramp
@@ -108,11 +108,11 @@ if __name__ == '__main__':
         record video
     """
     
-    if video1==1:
+    if video1==2:
             returned=os.system("raspivid -o ../../output/"  + \
                 filename1 + ".h264 --preview 50,50,300,200  -fps 5 -drc high -t " \
                         + str(round((seconds_until_end+1)*1000,0)) + "&")
-    elif video1==2:
+    elif video1==1:
         returned=os.system("raspivid --preview 50,50,300,200 -fps 5 -drc high -t " \
                         + str(round((seconds_until_end+1)*1000,0)) + "&")
     
