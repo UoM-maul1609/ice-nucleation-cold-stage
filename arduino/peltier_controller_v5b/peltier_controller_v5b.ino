@@ -96,7 +96,7 @@ void readTemp() {
   value=analogRead(A7);
 //  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
 //  temperature_read=float(value)*1.0528-540.5262;
- temperature_read=(float(value)/1023.*5.-1.25)/5.e-3;
+ temperature_read=(float(value)/1023.*5.-1.25)/5.e-3-6.3;
   //Serial.println(value);
 
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
