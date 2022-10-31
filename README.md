@@ -353,7 +353,7 @@ In order to **make your own Ice Nucleation Cold Stage**, you may use the **part 
     <td>
     40 mm fan guard <br>
     <img src="images/bom/sunon_fan_guard.jpg" width="100"></td>
-    <td><a href="https://www.rapidonline.com/SUNON-FG-04-Fan-Grill-40mm-x-40mm-50-5138?IncVat=1&pdg=aud-313476735010:pla-336800058227:kwd-336800058227:cmp-757438067:adg-44804851896:crv-207912323492:pid-50-5138:dev-c&gclid=Cj0KCQjwv-DaBRCcARIsAI9sba88Hs9De4c6fpl-Nrf_ln1wQZMeWvz_mbl0ramittN_1RAl-sdb2TAaAj1EEALw_wcB" target="_blank"> Rapid electronics </a></td> 
+    <td><a href="https://www.rapidonline.com/SUNON-FG-04-Fan-Grill-40mm-x-40mm-50-5138?IncVat=1&pdg=aud-313476735010:pla-336800058227:kwd-336800058227:cmp-757438067:adg-44804851896:crv-207912323492:pid-50-5138:dev-c&gclid=Cj0KCQjwv-DaBRCcARIsAI9sba88Hs9De4c6fpl-Nrf_ln1wQZMeWvz_mbl0ramittN_1RAl-sdb2TAaAj1EEALw_wcB" target="_blank"> Rapid electronics</a> <br> Or Part No: 50-5136. SUNON FG-04 Fan Grill</td> 
     <td>£3.50</td>
   </tr>
 
@@ -361,8 +361,8 @@ In order to **make your own Ice Nucleation Cold Stage**, you may use the **part 
     <td>
     40 mm fan <br>
     <img src="images/bom/sunon_fan_5vdc.jpg" width="100"></td>
-    <td><a href="https://www.reichelt.com/gb/en/fan-5-v-dc-0-9-w-rpm-5800-fan-4010-5v-p43677.html?CTYPE=0&MWSTFREE=0&PROVID=2788&wt_guka=54951061155_263550072470&PROVID=2788&gclid=Cj0KCQjwv-DaBRCcARIsAI9sba-WNEJHtybDi85atG_sroZEsvyVNrddHD7doeqlnKYRUztaJ6kxCHgaAnc5EALw_wcB&" target="_blank"> Reichelt electronics </a></td> 
-    <td>£2.50</td>
+    <td><a href="https://www.reichelt.com/gb/en/fan-5-v-dc-0-9-w-rpm-5800-fan-4010-5v-p43677.html?CTYPE=0&MWSTFREE=0&PROVID=2788&wt_guka=54951061155_263550072470&PROVID=2788&gclid=Cj0KCQjwv-DaBRCcARIsAI9sba-WNEJHtybDi85atG_sroZEsvyVNrddHD7doeqlnKYRUztaJ6kxCHgaAnc5EALw_wcB&" target="_blank"> Reichelt electronics </a><br> Or SUNON EE40100S1-00U-999 DRR / 50-5096
+</td>     <td>£2.50</td>
   </tr>
   
   <tr>

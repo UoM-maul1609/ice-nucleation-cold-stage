@@ -53,18 +53,20 @@ if __name__ == '__main__':
         # write every "interval"
         
         # pack float and 2 bytes into a byte array
-        bytescommand = struct.pack('<1fbb',round(temperature,2),int(command),int(test)) 
+        #bytescommand = struct.pack('<1fbb',round(temperature,2),int(command),int(test)) 
         # write this data
         fn=np.nan
         while np.isnan(fn):
-            try:
-                bus.write_block_data(arduinoAddress,1,list(bytescommand))
-                time.sleep(0.1)
-                data = get_data()
-                time.sleep(0.1)
-                data = get_data()
-                fn=get_float(data,0)
-            except:
-                pass
-        print("Peltier switched off with set-point " + str(temperature) + " and value " + format(fn,"0.2f"))            
+           try:
+              #bus.write_block_data(arduinoAddress,1,list(bytescommand))
+              time.sleep(0.1)
+              data = get_data()
+              time.sleep(0.1)
+              data = get_data()
+              fn=get_float(data,0)
+           except:
+              pass
+        
+        print("Peltier value " + format(fn,"0.2f"))            
+
 

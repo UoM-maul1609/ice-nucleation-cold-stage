@@ -124,52 +124,50 @@ if __name__ == '__main__':
         currentmillis = millis()
         #if(currentmillis  >= ((prevmillis % interval)*interval+interval)):
         if(currentmillis  - prevmillis >= (interval-0.5)):
-                
-                # for first time_init seconds set the temperature to temperature_init
-                if(currentmillis <= time_init*1000):
-                    temperature=temperature_init
-                elif((currentmillis > time_init*1000) and 
-                    (currentmillis <= seconds_until_ramp_finished*1000)):
-                    temperature = temperature_init+gradient*(currentmillis/1000.-time_init)
-                elif((currentmillis > seconds_until_ramp_finished*1000) and
-                    (currentmillis <= seconds_until_end*1000)):
-                    temperature = arr[1,0]
-                elif((currentmillis > seconds_until_end*1000)):
-                    temperature = 100.
-        
-                #temperature=100.
-                # write every "interval"
                 try:
-                        # pack float and 2 bytes into a byte array
-                        bytescommand = struct.pack('<1fbb',round(temperature,2),int(command),int(test)) 
-                        # write this data
-                        fn=np.nan
-                        while np.isnan(fn) or np.abs(fn-temperature)> 5.:
-                                bus.write_block_data(arduinoAddress,1,list(bytescommand))
-                                time.sleep(0.01)
-                                data = get_data()
-                                fn=get_float(data,0)
-                                if currentmillis > seconds_until_end*1000:
-                                        break
-                                
-                        print(format(currentmillis/1000.,"0.2f"),format(temperature,"0.2f"),format(fn,"0.2f"))
+                
+                    # for first time_init seconds set the temperature to temperature_init
+                    if(currentmillis <= time_init*1000):
+                        temperature=temperature_init
+                    elif((currentmillis > time_init*1000) and 
+                        (currentmillis <= seconds_until_ramp_finished*1000)):
+                        temperature = temperature_init+gradient*(currentmillis/1000.-time_init)
+                    elif((currentmillis > seconds_until_ramp_finished*1000) and
+                        (currentmillis <= seconds_until_end*1000)):
+                        temperature = arr[1,0]
+                    elif((currentmillis > seconds_until_end*1000)):
+                        temperature = 100.
+        
 
-                        """
-                                write to a file
-                        """
+                    # pack float and 2 bytes into a byte array
+                    bytescommand = struct.pack('<1fbb',round(temperature,2),int(command),int(test)) 
+                    # write this data
+                    fn=np.nan
+                    while np.isnan(fn) or np.abs(fn-temperature)> 10.:
+                            bus.write_block_data(arduinoAddress,1,list(bytescommand))
+                            time.sleep(0.01)
+                            data = get_data()
+                            fn=get_float(data,0)
+                            if currentmillis > seconds_until_end*1000:
+                                break
+                                
+                    print(format(currentmillis/1000.,"0.2f"),format(temperature,"0.2f"),format(fn,"0.2f"))
+
+                    """
+                       write to a file
+                    """
                         
-                        fp=open("../../output/" + filename1 +".txt","a")
-                        fp.write("{:f}".format(currentmillis/1000.) + " " \
+                    fp=open("../../output/" + filename1 +".txt","a")
+                    fp.write("{:f}".format(currentmillis/1000.) + " " \
                                 +"{:f}".format(temperature) + " " \
                                 +"{:f}".format(fn) + "\n")
-                        fp.close()
+                    fp.close()
                         
-                        prevmillis = prevmillis+interval
+                    prevmillis = prevmillis+interval
                         
-                        if((currentmillis >= seconds_until_end*1000)):
-                             break
+                    if((currentmillis >= seconds_until_end*1000)):
+                         break
                 except:
-                        continue
+                    continue
     
-        #time.sleep(0.01)
 
