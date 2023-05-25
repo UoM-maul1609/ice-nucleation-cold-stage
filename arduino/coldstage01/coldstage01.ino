@@ -50,7 +50,7 @@ void setup ()
 {
   
   Serial.begin(9600);
-  Serial.println("Peltier Controller Code for Cold Stage 001 (2020-04-24)");
+  Serial.println("Peltier Controller Code for Cold Stage 001 (2023-05-25)");
   
   pinMode(MPIN, OUTPUT); // output pin for OCR2B
   pinMode(5,INPUT);
@@ -93,10 +93,11 @@ void readTemp() {
    * AD8495 thermocouple
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-  value=analogRead(A0);
+  value=analogRead(A7);
 //  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
 //  temperature_read=float(value)*1.0528-540.5262;
- temperature_read=(float(value)/1023.*5.-1.25)/5.e-3 - 6.3;
+// temperature_read=(float(value)/1023.*5.-1.25)/5.e-3-6.3;
+ temperature_read=float(value)*1.078988 - 278.587;
   //Serial.println(value);
 
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -298,8 +299,3 @@ void receiveEvent(int howMany)
 }
 /* ------------------------------------------------------------------
 */
-
-
-
-
-

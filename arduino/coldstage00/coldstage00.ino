@@ -1,39 +1,48 @@
+#include <util/atomic.h>
+
 #include <Wire.h> // for i2c communication between RPi and Arduino
-#include <PID_v1.h> // for PID control by Arduino - Brett Beauregard
-#include "Adafruit_MAX31855.h" // thermocouple
+#include <PID_v1.h> // for PID control by Arduino
 
 #define ADDRESS 0x04
 #define sampletime 1000 // time for printing to Serial 
 #define rpi true
+#define writeserial false
 #define FLOATS_SENT 1 // number of floating-point variables sent to RPi
 #define high_freq true
 float factor = 1.; // was 62
 #define MPIN 6
 
-// MAX31855
-const int maxSO =  12;
-const int maxCS = 11;
-const int maxSCK = 10;
-//Create a MAX31855 reference and tell it what pin does what
-Adafruit_MAX31855 kTC(maxSCK, maxCS, maxSO);
-
-
-
-float data_s[FLOATS_SENT]; // buffer to send variables to RPi
+volatile float data_s[FLOATS_SENT]; // buffer to send variables to RPi
+volatile float tstore=0.;
+volatile float tstore2;
 byte data[12]; // buffer to read variables sent from RPi (as bytes)
 int command,potVal;
 
-unsigned long  starttime,newmillis; // variable to determine when Serial IO occurs
+unsigned long  starttime,newmillis,starttime2,newmillis2; // variable to determine when Serial IO occurs
+
+
+
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  variables for PID https://playground.arduino.cc/Code/PIDLibaryBasicExample
    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-double temperature_read = 0.0, Setpoint=100.0, Output; // set point initially high, so current off
-int numr=0;
+volatile float temperature_read = 0.0, Setpoint=100.0, Output; // set point initially high, so current off
+volatile int numr=0,numrs=0;
 #define OUTPUT_MIN 235
 #define OUTPUT_MAX 10
-PID myPID(&temperature_read, &Output,&Setpoint, 2, 5, 1, P_ON_M, REVERSE);
+//PID myPID((double *) &temperature_read, (double *) &Output,
+//  (double *) &Setpoint, 2, 5, 1, P_ON_E, REVERSE);
+
+// tuned at 5 C using Ziegler-Nichols method
+// http://www.pcbheaven.com/wikipages/PID_Theory/?p=1
+// set i and d to zero, slowly increase kc
+//  until oscillation centered about set-point
+// note period of oscillation in seconds - this is pc
+#define pc 30. // seconds
+#define kc 21. // critical gain
+PID myPID((double *) &temperature_read, (double *) &Output,
+  (double *) &Setpoint, 0.6*kc, 0.5*pc, pc/8., P_ON_M, REVERSE);
 /* ------------------------------------------------------------------
 */
 
@@ -41,12 +50,12 @@ void setup ()
 {
   
   Serial.begin(9600);
+  Serial.println("Peltier Controller Code for Cold Stage 000 (2023-05-25)");
+  
   pinMode(MPIN, OUTPUT); // output pin for OCR2B
   pinMode(5,INPUT);
   pinMode(4,INPUT);
   pinMode(A1,INPUT); // pot read
-  pinMode(9,OUTPUT);
-  digitalWrite(9,HIGH);
 
   if(high_freq) {
     TCCR0B=TCCR0B & B11111000 | B00000001; // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
@@ -56,6 +65,7 @@ void setup ()
   } 
     
   starttime = millis()/factor;   // get the current time;
+  starttime2 = millis()/factor;   // get the current time;
 
   // turn PID on
   myPID.SetMode(AUTOMATIC);
@@ -64,6 +74,9 @@ void setup ()
   data_s[0]=0.;
   // read the temperature
   readTemp();
+
+
+  
   // i2c comms
   Wire.begin(ADDRESS);
   Wire.onReceive(receiveEvent); // Register event: receive set point from RPi
@@ -80,15 +93,23 @@ void readTemp() {
    * AD8495 thermocouple
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-//  value=analogRead(A0);
+  value=analogRead(A0);
 //  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
 //  temperature_read=float(value)*1.0528-540.5262;
-  temperature_read=kTC.readCelsius();
-  
-  numr++;
-  data_s[0]+=temperature_read;
-  /* ------------------------------------------------------------------
-  */
+// temperature_read=(float(value)/1023.*5.-1.25)/5.e-3 - 6.3;
+ temperature_read=float(value)*1.060998-282.715;
+  //Serial.println(value);
+
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {    
+      numr++;
+      data_s[0]+=temperature_read;
+  }
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {    
+      tstore+=temperature_read;
+      numrs++;
+  }
 }
 
 
@@ -101,7 +122,7 @@ void loop ()
   // read the temperature
   readTemp();
   
-
+  newmillis = millis()/factor;
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Power to Peltier
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -131,22 +152,27 @@ void loop ()
     } else {              // use potential divider to 
                           // determine PWM for buck converter / Peltier
       potVal=analogRead(A1);
-      potVal=map(potVal,0,1023,0,235);
-      potVal=min(potVal,235);
+      potVal=map(potVal,0,1023,0,OUTPUT_MIN);
+      potVal=min(potVal,OUTPUT_MIN);
       analogWrite(MPIN,potVal);
     }
     //delay(100*factor);
   }
   /* ------------------------------------------------------------------
   */
-
-
+  /*newmillis2=millis()/factor;
+  if((newmillis2-starttime2 >= sampletime)) {
+    float temp;
     Serial.print("Temperature is ");
-    Serial.print(temperature_read);
+    temp=tstore / numrs;
+    Serial.print(temp);
     Serial.print("; Output is ");
     Serial.print(Output);
     Serial.println("");
-
+    starttime2=millis()/factor;
+    tstore=0.;
+    numrs=0;
+  }*/
 
 
 
@@ -172,7 +198,7 @@ void parseValues(byte data[]) {
   ft.b[2] = data[3];
   ft.b[3] = data[4];
 
-  if(!isnan(ft.fval)) Setpoint = double(ft.fval);
+  if(!isnan(ft.fval)) Setpoint = float(ft.fval);
   
 }
 /* ------------------------------------------------------------------
@@ -189,12 +215,22 @@ void sendData(){
    * Serial 
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-  newmillis = millis()/factor;
-  if((newmillis-starttime >= sampletime)) {
-    data_s[0] /= numr;
+  
+  
+  //if((newmillis-starttime) >= sampletime) {
+//    data_s[0] /= numr;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {    
+      tstore2=(float)data_s[0] / numr;
+
+    Wire.write((uint8_t *) &tstore2, FLOATS_SENT*sizeof(float));
+    
+    data_s[0]=0.;
+    numr=0;
+
+#if writeserial
     Serial.print("Temperature is ");
-    Serial.print(data_s[0]);
-    Wire.write((byte*) &data_s[0], FLOATS_SENT*sizeof(float));
+    Serial.print(tstore2);
     Serial.print(" ");
     Serial.print(Setpoint);
     Serial.print(" ");
@@ -204,11 +240,12 @@ void sendData(){
     Serial.print(" ");
     Serial.print(newmillis);
     Serial.println();
-    
-    starttime=millis()/factor;
-    data_s[0]=0.;
-    numr=0;
-  }
+#endif
+
+    starttime=newmillis;
+//    delay(1*factor);
+    }
+  //}
   /* ------------------------------------------------------------------
   */
   //delay(1*factor);
@@ -258,6 +295,12 @@ void receiveEvent(int howMany)
       Serial.print(" ");*/
       parseValues(data);
    //}
+   //myPID.SetTunings(0.6*kc, 0.5*pc, pc/8.);
 }
 /* ------------------------------------------------------------------
 */
+
+
+
+
+
