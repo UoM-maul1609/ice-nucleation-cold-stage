@@ -113,7 +113,7 @@ if __name__ == '__main__':
                 filename1 + ".h264 --preview 50,50,300,200  -fps 5 -drc high -t " \
                         + str(round((seconds_until_end+1)*1000,0)) + "&")
     elif video1==1:
-        returned=os.system("raspivid --preview 50,50,500,250 -fps 5 -drc high -t " \
+        returned=os.system("raspivid --preview 50,50,300,200 -fps 5 -drc high -t " \
                         + str(round((seconds_until_end+1)*1000,0)) + "&")
     
     """
