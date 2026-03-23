@@ -56,7 +56,7 @@ print('...done')
 """
     some initial variables
 """
-plotFP = False
+plotFP = True
 drawing = False # true if mouse is pressed
 slide1 = False
 grow1 = False
@@ -286,10 +286,13 @@ while success:
     for i in range(d_total):
         x,y,r = circleStore['x'][i], circleStore['y'][i], circleStore['radii'][i]
         # writes the circle onto the roi mask
+        roi = np.zeros(frame.shape[:2], np.uint8)
         roi = cv.circle(roi, (x, y), r, 255, cv.FILLED)
         mask = np.ones_like(frame) * 255
         # this gets the part of the image masked by roi and puts on mask
+        # the line below gives us just this drop on the image
         mask = cv.bitwise_and(mask, frame, mask=roi) + cv.bitwise_and(mask, mask, mask=~roi)
+        # bounding square for the circle, radius r, centroid x and y
         x1 = max(x-r - border//2, 0)      # eventually  -(border//2+1)
         x2 = min(x+r + border//2, width)  # eventually  +(border//2+1)
         y1 = max(y-r - border//2, 0)      # eventually  -(border//2+1)
@@ -297,10 +300,15 @@ while success:
 
         # get the part of the image that corresponds to the drop
         image = mask[y1:y2,x1:x2]
+        # convert to greyscale
         img1=cv.cvtColor(frame1,cv.COLOR_BGR2GRAY)
+        # average brightness of test area
         square_scale1=np.mean(img1[-100:-1,-100:-1])
 
-        std=np.nanstd(image*square_scale/square_scale1)
+	# scale out brightness variation from frame to frame
+        #std=np.nanstd(image*square_scale/square_scale1)
+        # don't scale out the brightness from image to image
+        std=np.nanstd(image)
 
         results.append(std)
         frame_count.append(count)
@@ -339,11 +347,13 @@ if plotFP == True:
 freezing_frame=[]
 kernel_size = 10 
 kernel = np.ones(kernel_size) / kernel_size 
+skip_frames=150 #8
+skip_framesp1=skip_frames+1
 for column in data.T:
-    column = np.convolve(column, kernel, mode='same')
-    a_prime = column[9:-kernel_size+1] - column[8:-kernel_size]
+    #column = np.convolve(column, kernel, mode='same')
+    a_prime = column[skip_framesp1:-kernel_size+1] - column[skip_frames:-kernel_size]
     answer = np.argmax(np.abs(a_prime))
-    freezing_frame.append(answer+8) # +8 adjusts for missing frames
+    freezing_frame.append(answer+skip_frames) # +skip_frames adjusts for missing frames
 
 print(sorted(freezing_frame))
 freezing_frame = np.array(freezing_frame)  
@@ -355,7 +365,8 @@ freezing_frame = np.array(freezing_frame)
 """
 
 #   load text file
-a = np.loadtxt(filename2+'.txt', skiprows=2)
+#a = np.loadtxt(filename2+'.txt', skiprows=2)
+a = np.genfromtxt(filename2 + '.txt', skip_header=2, invalid_raise=False)
 x = freezing_frame[0:]/5 # /5 refers to fps
 
 temp = np.interp(x, a[:,0], a[:,2])
