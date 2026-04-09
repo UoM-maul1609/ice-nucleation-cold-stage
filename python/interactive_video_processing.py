@@ -350,10 +350,12 @@ kernel = np.ones(kernel_size) / kernel_size
 skip_frames=150 #8
 skip_framesp1=skip_frames+1
 for column in data.T:
+    ind11,=np.where(column<90.0)
+    column2=column[ind11]
     #column = np.convolve(column, kernel, mode='same')
-    a_prime = column[skip_framesp1:-kernel_size+1] - column[skip_frames:-kernel_size]
+    a_prime = column2[skip_framesp1:-kernel_size+1] - column2[skip_frames:-kernel_size]
     answer = np.argmax(np.abs(a_prime))
-    freezing_frame.append(answer+skip_frames) # +skip_frames adjusts for missing frames
+    freezing_frame.append(ind11[answer+skip_frames]) # +skip_frames adjusts for missing frames
 
 print(sorted(freezing_frame))
 freezing_frame = np.array(freezing_frame)  
