@@ -49,7 +49,7 @@ PID myPID((double *) &temperature_pid, (double *) &Output,
 #define kd 0.0*/
 
 #define kpw 13.5
-#define kiw 0.2
+#define kiw 0.7
 #define kdw 0.0
 
 #define kpc kpw
@@ -81,8 +81,11 @@ void setup ()
     TCCR0B = _BV(CS01); // Prescaler 8 -> 16MHz / (8 * 64) = 31.25kHz*/
 
     // 7.8kHz
-    TCCR0B = (TCCR0B & B11111000) | B00000010;
-    factor = 8.;
+    /*TCCR0B = (TCCR0B & B11111000) | B00000010;
+    factor = 8.;*/
+    // 1kHz
+    TCCR0B = (TCCR0B & B11111000) | B00000011;
+    factor = 1.;
 } 
     
   starttime = millis()/factor;   // get the current time;
@@ -91,7 +94,7 @@ void setup ()
   // turn PID on
   myPID.SetMode(AUTOMATIC);
   myPID.SetOutputLimits(OUTPUT_MAX, OUTPUT_MIN);
-  myPID.SetSampleTime(30*factor);
+  myPID.SetSampleTime(100*factor);
   data_s[0]=0.;
   // read the temperature
   readTemp();
@@ -118,7 +121,8 @@ void readTemp() {
 //  temperature_read=(float(value)/1023.*5.)*203.5837-508.7424;
 //  temperature_read=float(value)*1.0528-540.5262;
 // temperature_read=(float(value)/1023.*5.-1.25)/5.e-3-6.3;
- temperature_read=float(value)*1.078988 - 278.587;
+// temperature_read=float(value)*1.078988 - 278.587;
+ temperature_read=float(value)*1.06892327 - 273.38273772;
  
 // low-pass filter
 temperature_pid = 0.9*temperature_pid + 0.1*temperature_read; //Serial.println(value);
